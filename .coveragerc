@@ -1,0 +1,5 @@
+[run]
+omit = 
+    fast_zero/settings.py
+    fast_zero/__init__.py 
+

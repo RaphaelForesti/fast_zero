@@ -8,6 +8,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12.7"
 fastapi = {extras = ["standard"], version = "^0.115.4"}
+sqlalchemy = "^2.0.36"
+pydantic-settings = "^2.6.1"
+alembic = "^1.14.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -40,7 +43,7 @@ quote-style = 'single'
 run     = 'fastapi dev fast_zero/app.py'
 
 pre_test = 'task lint'
-test    = 'pytest --cov=fast_zero -vv'
+test     = 'pytest --cov=fast_zero -vv --ignore=fast_zero/settings.py'
 post_test = 'coverage html'
 
 lint    = 'ruff check . && ruff check . --diff'

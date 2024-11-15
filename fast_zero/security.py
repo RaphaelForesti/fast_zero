@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt import DecodeError, decode, encode
+from jwt import ExpiredSignatureError, PyJWTError, decode, encode
 from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -49,13 +49,22 @@ def get_current_user(
         detail='Could not validate credentials',
         headers={'WWW-Authenticate': 'Berear'},
     )
+
+    expeired_credentials_exception = HTTPException(
+        status_code=HTTPStatus.UNAUTHORIZED,
+        detail='Expired credentials',
+        headers={'WWW-Authenticate': 'Berear'},
+    )
     try:
         payload = decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get('sub')
         if not username:
             raise credentials_exception
         token_data = TokenData(username=username)
-    except DecodeError:
+    except ExpiredSignatureError:
+        raise expeired_credentials_exception
+
+    except PyJWTError:
         raise credentials_exception
 
     user = session.scalar(select(User).where(User.email == token_data.username))

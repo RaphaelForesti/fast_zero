@@ -1,22 +1,23 @@
 from http import HTTPStatus
+from random import randint
 
-from fast_zero.schemas import UserDb, UserPublic
+from fast_zero.schemas import UserPublic, UserSchema
 
 
-def test_create_user(client):
+def test_create_user(client, temp_user):
     response = client.post(
         '/users/',
         json={
-            'username': 'testeuser',
-            'password': 'password',
-            'email': 'email@teste.com',
+            'username': temp_user.username,
+            'password': temp_user.password,
+            'email': temp_user.email,
         },
     )
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         'id': 1,
-        'username': 'testeuser',
-        'email': 'email@teste.com',
+        'username': temp_user.username,
+        'email': temp_user.email,
     }
 
 
@@ -36,47 +37,47 @@ def test_read_users_with_users(client, user):
 
 def test_get_user(client, user):
     user_schema = UserPublic.model_validate(user).model_dump()
-    response = client.get('/users/1')
+    response = client.get(f'/users/{user.id}')
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == user_schema
 
 
 def test_get_user_not_found(client):
-    response = client.get('/users/100')
+    response = client.get(f'/users/{randint(2, 10)}')
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_update_user(client, user, token):
+def test_update_user(client, user, token, temp_user):
     response = client.put(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'testeusername2',
-            'password': '123',
-            'email': 'test@test.com',
-            'id': 1,
+            'username': user.username,
+            'password': user.password,
+            'email': temp_user.email,
+            'id': user.id,
         },
     )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'id': 1,
-        'username': 'testeusername2',
-        'email': 'test@test.com',
+        'username': user.username,
+        'email': temp_user.email,
+        'id': user.id,
     }
 
 
-def test_update_user_not_found(client, token):
+def test_update_user_not_found(client, token, other_user, user):
     response = client.put(
-        '/users/100',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'testeusername2',
-            'password': '123',
-            'email': 'test@test.com',
-            'id': 1,
+            'username': other_user.username,
+            'password': other_user.password,
+            'email': other_user.email,
+            'id': user.id,
         },
     )
 
@@ -93,9 +94,9 @@ def test_delete_user(client, user, token):
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_delete_user_not_found(client, token):
+def test_delete_user_not_found(client, token, other_user):
     response = client.delete(
-        '/users/100/', headers={'Authorization': f'Bearer {token}'}
+        f'/users/{other_user.id}/', headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.status_code == HTTPStatus.FORBIDDEN
@@ -103,7 +104,7 @@ def test_delete_user_not_found(client, token):
 
 
 def test_username_alredy_exists(client, user):
-    user_schema = UserDb.model_validate(user).model_dump()
+    user_schema = UserSchema.model_validate(user).model_dump()
     response = client.post(
         '/users/',
         json=user_schema,
@@ -112,13 +113,13 @@ def test_username_alredy_exists(client, user):
     assert response.json() == {'detail': 'Username alredy exists'}
 
 
-def test_email_alredy_exists(client, user):
+def test_email_alredy_exists(client, user, temp_user):
     response = client.post(
         '/users/',
         json={
-            'username': 'testeuser',
-            'password': 'password',
-            'email': 'teste@test.com',
+            'username': temp_user.username,
+            'password': temp_user.password,
+            'email': user.email,
         },
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST

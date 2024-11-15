@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 
@@ -9,6 +11,12 @@ class UserSchema(BaseModel):
     username: str
     email: EmailStr
     password: str
+    model_config = {'from_attributes': True}
+
+
+class UserSchemaTemp(UserSchema):
+    clean_password: Optional[int] = None
+    model_config = {'from_attributes': True}
 
 
 class UserDb(UserSchema):

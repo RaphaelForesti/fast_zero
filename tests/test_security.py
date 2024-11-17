@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import NoReturn
 
 from fastapi.testclient import TestClient
 from jwt import decode
@@ -7,7 +6,7 @@ from jwt import decode
 from fast_zero.security import create_access_token, settings
 
 
-def test_jwt(user: NoReturn):
+def test_jwt(user):
     data = {'sub': user.email}
     token = create_access_token(data=data)
 
@@ -17,7 +16,7 @@ def test_jwt(user: NoReturn):
     assert result['exp']
 
 
-def test_jwt_invalid_token(client: TestClient, user: NoReturn):
+def test_jwt_invalid_token(client: TestClient, user):
     response = client.delete(
         f'/users/{user.id}', headers={'Authorization': 'Bearer token-invalido'}
     )

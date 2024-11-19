@@ -10,7 +10,7 @@ jobs:
     steps: 
       - name: Copy Files from Repo
         uses: actions/checkout@v3
-        
+
       - name: Install Python
         uses: actions/setup-python@v5  # Corrigido para a versão v5
         with:
@@ -21,3 +21,6 @@ jobs:
 
       - name: Install Dependenc
         run: poetry install     
+
+      - name: Execute tests
+        run: poetry run task test    

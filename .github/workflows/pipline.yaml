@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest  # Corrigido de ubuntu-lasted para ubuntu-latest
 
     steps: 
+      - name: Copy Files from Repo
+        uses: actions/checkout@v3
+        
       - name: Install Python
         uses: actions/setup-python@v5  # Corrigido para a versão v5
         with:
